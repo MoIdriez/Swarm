@@ -1,0 +1,54 @@
+#include "painlessMesh.h"
+
+#define   MESH_PREFIX     "whateverYouLike"
+#define   MESH_PASSWORD   "somethingSneaky"
+#define   MESH_PORT       5555
+
+painlessMesh  mesh;
+boolean isLogger = true;
+
+Task myLoggingTask(10000, TASK_FOREVER, []() {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& msg = jsonBuffer.createObject();
+    msg["topic"] = "sensor";
+    msg["nodeId"] = mesh.getNodeId();
+    msg["value"] = random(0, 180);
+
+    String str;
+    msg.printTo(str);
+    mesh.sendBroadcast(str);
+});
+
+void receivedCallback( uint32_t from, String &msg ) {
+  Serial.printf("logServer: Received from %u msg=%s\n", from, msg.c_str());
+}
+
+void setup() {
+  Serial.begin(115200);
+    
+  //mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
+  mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, STA_AP, AUTH_WPA2_PSK, 6 );
+  
+  if (isLogger) {
+    mesh.onReceive(&receivedCallback);
+    
+    mesh.onNewConnection([](size_t nodeId) {
+      Serial.printf("New Connection %u\n", nodeId);
+    });
+
+    mesh.onDroppedConnection([](size_t nodeId) {
+      Serial.printf("Dropped Connection %u\n", nodeId);
+    });
+
+  } else {
+    mesh.scheduler.addTask(myLoggingTask);
+    myLoggingTask.enable();      
+  }  
+}
+
+void loop() {
+  mesh.update();
+}
+
+
+

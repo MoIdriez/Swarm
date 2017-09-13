@@ -1,0 +1,40 @@
+#define AIA D4 
+#define AIB D3 
+#define BIA D2
+#define BIB D1 
+
+// functional connections
+#define MOTOR_B_PWM BIA // Motor B PWM Speed
+#define MOTOR_B_DIR BIB // Motor B Direction
+#define MOTOR_A_PWM AIA // Motor A PWM Speed
+#define MOTOR_A_DIR AIB // Motor A Direction
+
+const int high = 200;
+const int low = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(AIA,OUTPUT);
+  pinMode(AIB,OUTPUT);
+  pinMode(BIA,OUTPUT);
+  pinMode(BIB,OUTPUT);
+}
+
+
+void loop() {  
+}
+
+void forward() {
+  digitalWrite(AIA, high);       
+  digitalWrite(BIA, low);       
+  digitalWrite(AIB, low);       
+  digitalWrite(BIB, high);    
+}
+
+void backward() {
+  digitalWrite(AIA, low);       
+  digitalWrite(BIA, high);       
+  digitalWrite(AIB, high);       
+  digitalWrite(BIB, low);    
+}
+

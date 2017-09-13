@@ -1,0 +1,39 @@
+
+#include "libraries/Maxbotix/Maxbotix.h"
+#include "libraries/Maxbotix/Maxbotix.cpp"
+Maxbotix rangeSensorAD(A0, Maxbotix::AN, Maxbotix::LV, Maxbotix::BEST, 9); // Set the Maxbotix to read Analog from pin 0 with a mode filter sample sized to 9
+void setup()
+{
+  Serial.begin(9600);
+  rangeSensorAD.setADSampleDelay(10); // Set the delay between AD readings to 10ms
+}
+
+void loop() {
+  long start = millis();
+  Serial.print("AD (BEST): ");
+  Serial.print(rangeSensorAD.getRange());
+  Serial.print("cm - ");
+  Serial.print(millis() - start);
+  Serial.print("ms - ");
+  printArray(rangeSensorAD.getSample(), rangeSensorAD.getSampleSize());
+  Serial.print(" - Highest Mode: ");
+  Serial.print(rangeSensorAD.getSampleMode(true));
+  Serial.print(" - Lowest Mode: ");
+  Serial.print(rangeSensorAD.getSampleMode(false));
+  Serial.print(" - Median: ");
+  Serial.print(rangeSensorAD.getSampleMedian());
+  Serial.print(" - Best: ");
+  Serial.print(rangeSensorAD.getSampleBest());
+  Serial.println();
+}
+
+void printArray(float* array, uint8_t array_size) {
+  Serial.print("[");
+  for (int i = 0; i < array_size; i++) {
+    Serial.print(array[i]);
+    if (i != array_size - 1) {
+      Serial.print(", ");
+    }
+  }
+  Serial.print("]");
+}
