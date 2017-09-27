@@ -28,54 +28,28 @@ void loop() {
   mesh.update();
   while(Serial.available()) {
     char inChar = (char)Serial.read();
-    inputString += inChar;
     if (inChar == '\n') {
-      receivedSerial();
+      sendBroadcast(inputString);
       inputString = "";
+    } else {
+      inputString += inChar;      
     }
   }
 }
 
-void receivedSerial() {
-  sendMotorCommands(inputString);
-}
-
-void sendMotorCommands(String message) {
-  int i = message.indexOf("-");
-  String lspd = message.substring(0,i);
-  String rspd = message.substring(i+1, message.length()-1);
-
-  sendMotorCommands(lspd.toInt(), rspd.toInt());    
-}
-
-void sendMotorCommands(int lspd, int rspd) {
-  if (lspd > 250) { lspd = 250; }
-  if (rspd > 250) { rspd = 250; }
-  if (lspd < 0) { lspd = 0; }
-  if (rspd < 0) { rspd = 0; }
-
-  String value = String( String(lspd) + "-" + String(rspd) );
-  sendBroadcast("MotorCommands", value);  
-}
-
-void sendBroadcast(String topic, String value) {
+void sendBroadcast(String message) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& msg = jsonBuffer.createObject();
   
-  msg["from"] = mesh.getNodeId();
   msg["to"] = "all";
-  msg["topic"] = topic;
-  msg["value"] = value;
+  msg["topic"] = "LoggerBroadCast";
+  msg["msg"] = message;
 
   String str;
   msg.printTo(str);
-  logBroadcast(str);
+  String logMessage = String("Sending: " + str);
+  Serial.println(logMessage); 
   mesh.sendBroadcast(str);  
-}
-
-void logBroadcast(String message) {
-  String logMessage = String("Sending: " + message);
-  Serial.println(logMessage);  
 }
 
 
